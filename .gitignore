@@ -24,3 +24,4 @@ cypress/screenshots
 !.yarn/sdks
 !.yarn/versions
 .env
+.venv
