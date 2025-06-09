@@ -1,3 +1,4 @@
+import time
 import psycopg2
 
 POSTGRESQL_IP   = "10.228.5.96"
@@ -7,12 +8,12 @@ POSTGRESQL_PW   = "postgres"
 POSTGRESQL_PORT = "5432"
 
 connection  = psycopg2.connect(f"""
-    host={POSTGRESQL_IP}
-    dbname={POSTGRESQL_DB}
-    user={POSTGRESQL_ID}
-    password={POSTGRESQL_PW}
-    port={POSTGRESQL_PORT}
-    """)
+    host        = {POSTGRESQL_IP}
+    dbname      = {POSTGRESQL_DB}
+    user        = {POSTGRESQL_ID}
+    password    = {POSTGRESQL_PW}
+    port        = {POSTGRESQL_PORT}
+""")
 cursor      = connection.cursor()
 
 def send_query(
@@ -28,12 +29,20 @@ def send_query(
         connection.commit()
 
 GET_ALL_DATABASES   = """
-    SELECT datname FROM pg_database;
+    SELECT
+        datname
+    FROM
+        pg_database;
 """
 GET_ALL_TABLES      = """
-    SELECT * FROM pg_catalog.pg_tables
-    WHERE schemaname != 'pg_catalog'
-        AND schemaname != 'information_schema';
+    SELECT
+        table_schema || '.' || table_name
+    FROM
+        information_schema.tables
+    WHERE
+        table_type = 'BASE TABLE'
+    AND
+        table_schema NOT IN ('pg_catalog', 'information_schema');
 """
 CREATE_TABLE        = """
     CREATE TABLE {table_name}
@@ -57,6 +66,7 @@ print("#==== Drop table ====#")
 send_query(connection, cursor, DROP_TABLE.format(
     table_name  = "test_table",
 ), False)
+print(send_query(connection, cursor, GET_ALL_TABLES))
 print()
 
 print("#==== Create table ====#")
